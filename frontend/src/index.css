@@ -1,0 +1,102 @@
+body {
+  background: linear-gradient(to right, #fff8fa, #fce8ee, #f8d7e0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: "Poppins", Arial, sans-serif;
+}
+
+/* Container do login */
+.login-container {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Estilo do título */
+h2 {
+  color: #b81f5e;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+/* Campos de input */
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 2px solid #df2c72;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+input:focus {
+  border-color: #b81f5e;
+  outline: none;
+  box-shadow: 0 0 10px rgba(191, 30, 90, 0.4);
+}
+
+/* Botão estilizado */
+button {
+  width: 100%;
+  background: #df2c72;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  transition: 0.3s;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+button:hover {
+  background: #b81f5e;
+  box-shadow: 0 4px 12px rgba(191, 30, 90, 0.4);
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Notificação de sucesso e erro */
+.mensagem {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  color: white;
+}
+
+.sucesso {
+  background-color: #28a745;
+}
+
+.erro {
+  background-color: #dc3545;
+}
+
+/* Responsividade */
+@media (max-width: 400px) {
+  .login-container {
+    width: 90%;
+    padding: 20px;
+  }
+}
