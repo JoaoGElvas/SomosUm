@@ -1,13 +1,22 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import CadastroPessoa from "./pages/CadastroPessoa/CadastroPessoa";
 import Navbar from "./components/Navbar";
 
 function App() {
   console.log("App está sendo renderizado!"); // 👀 Teste para ver se o App está rodando
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Estado de autenticação baseado no localStorage
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    localStorage.getItem("auth") === "true"
+  );
+
+  // Atualiza o localStorage quando o estado de autenticação muda
+  useEffect(() => {
+    localStorage.setItem("auth", isAuthenticated);
+  }, [isAuthenticated]);
 
   return (
     <BrowserRouter>
@@ -20,6 +29,10 @@ function App() {
         <Route
           path="/dashboard"
           element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/cadastro"
+          element={isAuthenticated ? <CadastroPessoa /> : <Navigate to="/" />}
         />
       </Routes>
     </BrowserRouter>
