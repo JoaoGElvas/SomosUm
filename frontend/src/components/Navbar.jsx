@@ -13,19 +13,17 @@ const Navbar = () => {
     <nav className="navbar">
       <h1>SomosUm</h1>
       <ul>
-        {!localStorage.getItem("auth") && (
-          <li>
-            <Link to="/">Login</Link>
-          </li>
-        )}
         <li>
           <Link to="/dashboard">Dashboard</Link>
         </li>
         <li>
-          <Link to="/cadastro">Cadastrar Pessoa</Link>
+          <Link to="/cadastrar">Cadastrar Pessoa</Link>
         </li>
         <li>
-          <button className="logout-button" onClick={handleLogout}>
+          <Link to="/listar">Ver Pessoas</Link>
+        </li>
+        <li>
+          <button onClick={handleLogout} className="logout-button">
             Sair
           </button>
         </li>
