@@ -1,78 +1,101 @@
-require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
 const mysql = require("mysql2");
+const cors = require("cors");
 
 const app = express();
+const PORT = 5001;
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-// Configuração do banco de dados com Pool (melhor prática)
 const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10, // Limita conexões simultâneas
-  queueLimit: 0,
+  host: "localhost",
+  user: "root",
+  password: "", // Adicione sua senha do MySQL aqui
+  database: "somosum",
 });
 
-db.getConnection((err, connection) => {
+db.getConnection((err) => {
   if (err) {
     console.error("Erro ao conectar ao banco de dados:", err);
-    return;
+  } else {
+    console.log("Conectado ao banco de dados MySQL");
   }
-  console.log("Conectado ao banco de dados MySQL");
-  connection.release(); // Libera a conexão após verificar que está funcionando
+});
 
-  // Array com os comandos SQL para criar tabelas
-  const tables = [
-    `CREATE TABLE IF NOT EXISTS usuarios (
+const tables = [
+  `CREATE TABLE IF NOT EXISTS pessoas (
       id INT AUTO_INCREMENT PRIMARY KEY,
       nome VARCHAR(100) NOT NULL,
-      senha VARCHAR(255) NOT NULL
-    )`,
-    `CREATE TABLE IF NOT EXISTS pessoas (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      nome VARCHAR(100) NOT NULL,
-      sobrenome VARCHAR(100) NOT NULL,
-      idade INT NOT NULL,
-      residencia VARCHAR(255) NOT NULL,
-      crianca BOOLEAN NOT NULL,
-      estudando BOOLEAN NULL
-    )`,
-    `CREATE TABLE IF NOT EXISTS presencas (
+      cpf VARCHAR(11) UNIQUE NOT NULL,
+      rg VARCHAR(20) NOT NULL,
+      estado_civil VARCHAR(20) NOT NULL,
+      conjuge VARCHAR(100) DEFAULT NULL,
+      endereco VARCHAR(255) NOT NULL,
+      mora_no_morro BOOLEAN NOT NULL,
+      data_nascimento DATE NOT NULL,
+      telefone VARCHAR(20) NOT NULL,
+      qtd_pessoas_residencia INT NOT NULL,
+      tem_filhos BOOLEAN NOT NULL,
+      qtd_filhos INT DEFAULT NULL,
+      recebe_auxilio BOOLEAN NOT NULL,
+      recebe_vale_gas BOOLEAN NOT NULL,
+      recebe_outro_beneficio BOOLEAN NOT NULL,
+      outro_beneficio VARCHAR(255) DEFAULT NULL,
+      observacoes TEXT,
+      status ENUM('Ativo', 'Inativo') NOT NULL DEFAULT 'Ativo'
+  )`,
+  `CREATE TABLE IF NOT EXISTS filhos (
       id INT AUTO_INCREMENT PRIMARY KEY,
       pessoa_id INT NOT NULL,
-      data_presenca DATE NOT NULL,
+      nome VARCHAR(100) NOT NULL,
+      sexo ENUM('Menino', 'Menina') NOT NULL,
+      data_nascimento DATE NOT NULL,
+      estudando BOOLEAN DEFAULT NULL,
       FOREIGN KEY (pessoa_id) REFERENCES pessoas(id) ON DELETE CASCADE
-    )`,
-  ];
+  )`,
+];
 
-  tables.forEach((query) => {
-    db.query(query, (err) => {
-      if (err) console.error("Erro ao criar tabela:", err);
-      else console.log("Tabela criada com sucesso!");
-    });
+tables.forEach((query) => {
+  db.query(query, (err) => {
+    if (err) console.error("Erro ao criar tabela:", err);
+    else console.log("Tabela criada/verificada com sucesso!");
   });
 });
 
-// Rotas
-const authRoutes = express.Router();
-authRoutes.post("/login", (req, res) => {
-  const { nome, senha } = req.body;
-  if (nome === "admin" && senha === "senha123") {
-    return res.json({ message: "Login bem-sucedido", token: "fake-token" });
+function calcularIdade(dataNascimento) {
+  const hoje = new Date();
+  const nascimento = new Date(dataNascimento);
+  let idade = hoje.getFullYear() - nascimento.getFullYear();
+  const mesAtual = hoje.getMonth();
+  const mesNascimento = nascimento.getMonth();
+
+  if (
+    mesAtual < mesNascimento ||
+    (mesAtual === mesNascimento && hoje.getDate() < nascimento.getDate())
+  ) {
+    idade--;
   }
-  return res.status(401).json({ message: "Credenciais inválidas" });
+
+  return idade;
+}
+
+app.get("/api/people", (req, res) => {
+  db.query("SELECT * FROM pessoas", (err, results) => {
+    if (err) {
+      console.error("Erro ao buscar pessoas:", err);
+      return res.status(500).json({ error: "Erro ao buscar dados" });
+    }
+
+    const pessoasComIdade = results.map((pessoa) => ({
+      ...pessoa,
+      idade: calcularIdade(pessoa.data_nascimento),
+    }));
+
+    res.json(pessoasComIdade);
+  });
 });
-app.use("/api/auth", authRoutes);
 
-// Importa as rotas e passa a conexão do banco
-const personRoutes = require("./src/routes/personRoutes")(db);
-app.use("/api/people", personRoutes);
-
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
