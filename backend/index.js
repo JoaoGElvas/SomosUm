@@ -99,3 +99,16 @@ app.get("/api/people", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
+app.post("/api/login", (req, res) => {
+  const { nome, senha } = req.body;
+
+  const validUser = "admin";
+  const validPassword = "123456"; // Ajuste conforme necessário
+
+  if (nome === validUser && senha === validPassword) {
+    res.json({ success: true, message: "Login bem-sucedido!" });
+  } else {
+    res.status(401).json({ error: "Credenciais inválidas" });
+  }
+});

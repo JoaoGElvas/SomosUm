@@ -1,38 +1,68 @@
 import { useState } from "react";
+import axios from "axios";
 import "./CadastroPessoa.css";
 
 const CadastroPessoa = () => {
-  const [nome, setNome] = useState("");
-  const [idade, setIdade] = useState("");
-  const [localResidencia, setLocalResidencia] = useState("");
-  const [estudando, setEstudando] = useState(false);
-  const [mostrarEstudando, setMostrarEstudando] = useState(false);
-  const [observacao, setObservacao] = useState("");
+  const [formData, setFormData] = useState({
+    nome: "",
+    cpf: "",
+    rg: "",
+    estadoCivil: "Solteiro",
+    conjuge: "",
+    endereco: "",
+    moraNoMorro: false,
+    dataNascimento: "",
+    telefone: "",
+    qtdPessoasResidencia: "",
+    temFilhos: false,
+    filhos: [],
+    recebeAuxilio: false,
+    recebeValeGas: false,
+    recebeOutroBeneficio: false,
+    outroBeneficio: "",
+    observacoes: "",
+    status: "Ativo",
+  });
   const [mensagem, setMensagem] = useState("");
 
-  const handleCadastro = () => {
-    if (!nome || !idade || !localResidencia) {
-      alert("Preencha todos os campos obrigatórios!");
-      return;
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  const handleCadastro = async () => {
+    try {
+      await axios.post("http://localhost:5001/pessoas", formData);
+      setMensagem("Pessoa cadastrada com sucesso!");
+      setTimeout(() => setMensagem(""), 3000);
+      setFormData({
+        nome: "",
+        cpf: "",
+        rg: "",
+        estadoCivil: "Solteiro",
+        conjuge: "",
+        endereco: "",
+        moraNoMorro: false,
+        dataNascimento: "",
+        telefone: "",
+        qtdPessoasResidencia: "",
+        temFilhos: false,
+        filhos: [],
+        recebeAuxilio: false,
+        recebeValeGas: false,
+        recebeOutroBeneficio: false,
+        outroBeneficio: "",
+        observacoes: "",
+        status: "Ativo",
+      });
+    } catch (error) {
+      alert(
+        "Erro ao cadastrar: " + error.response?.data?.message || error.message
+      );
     }
-
-    const novaPessoa = { nome, idade, localResidencia, estudando, observacao };
-
-    // Salva no localStorage para simular um banco de dados
-    const pessoasSalvas = JSON.parse(localStorage.getItem("pessoas")) || [];
-    pessoasSalvas.push(novaPessoa);
-    localStorage.setItem("pessoas", JSON.stringify(pessoasSalvas));
-
-    // Mensagem de sucesso e limpeza dos campos
-    setMensagem("Pessoa cadastrada com sucesso!");
-    setNome("");
-    setIdade("");
-    setLocalResidencia("");
-    setEstudando(false);
-    setMostrarEstudando(false);
-    setObservacao("");
-
-    setTimeout(() => setMensagem(""), 3000);
   };
 
   return (
@@ -42,45 +72,131 @@ const CadastroPessoa = () => {
 
       <input
         type="text"
+        name="nome"
         placeholder="Nome"
-        value={nome}
-        onChange={(e) => setNome(e.target.value)}
+        value={formData.nome}
+        onChange={handleChange}
+        required
       />
-
-      <input
-        type="number"
-        placeholder="Idade"
-        value={idade}
-        onChange={(e) => {
-          setIdade(e.target.value);
-          setMostrarEstudando(e.target.value < 18);
-        }}
-      />
-
       <input
         type="text"
-        placeholder="Local de Residência"
-        value={localResidencia}
-        onChange={(e) => setLocalResidencia(e.target.value)}
+        name="cpf"
+        placeholder="CPF"
+        value={formData.cpf}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="text"
+        name="rg"
+        placeholder="RG"
+        value={formData.rg}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="text"
+        name="endereco"
+        placeholder="Endereço"
+        value={formData.endereco}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="tel"
+        name="telefone"
+        placeholder="Telefone"
+        value={formData.telefone}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="date"
+        name="dataNascimento"
+        value={formData.dataNascimento}
+        onChange={handleChange}
+        required
       />
 
-      {mostrarEstudando && (
-        <div className="checkbox-container">
-          <label>
-            <input
-              type="checkbox"
-              checked={estudando}
-              onChange={(e) => setEstudando(e.target.checked)}
-            />
-            Está estudando?
-          </label>
-        </div>
+      <label>
+        Estado Civil:
+        <select
+          name="estadoCivil"
+          value={formData.estadoCivil}
+          onChange={handleChange}
+        >
+          <option value="Solteiro">Solteiro</option>
+          <option value="Casado">Casado</option>
+          <option value="Divorciado">Divorciado</option>
+          <option value="Viúvo">Viúvo</option>
+        </select>
+      </label>
+
+      {formData.estadoCivil === "Casado" && (
+        <input
+          type="text"
+          name="conjuge"
+          placeholder="Nome do Cônjuge"
+          value={formData.conjuge}
+          onChange={handleChange}
+        />
+      )}
+
+      <label>
+        <input
+          type="checkbox"
+          name="temFilhos"
+          checked={formData.temFilhos}
+          onChange={handleChange}
+        />
+        Tem filhos?
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          name="recebeAuxilio"
+          checked={formData.recebeAuxilio}
+          onChange={handleChange}
+        />
+        Recebe Auxílio Brasil?
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          name="recebeValeGas"
+          checked={formData.recebeValeGas}
+          onChange={handleChange}
+        />
+        Recebe Vale Gás?
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          name="recebeOutroBeneficio"
+          checked={formData.recebeOutroBeneficio}
+          onChange={handleChange}
+        />
+        Recebe outro benefício?
+      </label>
+
+      {formData.recebeOutroBeneficio && (
+        <input
+          type="text"
+          name="outroBeneficio"
+          placeholder="Qual benefício?"
+          value={formData.outroBeneficio}
+          onChange={handleChange}
+        />
       )}
 
       <textarea
-        placeholder="Observação"
-        value={observacao}
-        onChange={(e) => setObservacao(e.target.value)}
+        name="observacoes"
+        placeholder="Observações"
+        value={formData.observacoes}
+        onChange={handleChange}
       ></textarea>
 
       <button onClick={handleCadastro}>Cadastrar</button>

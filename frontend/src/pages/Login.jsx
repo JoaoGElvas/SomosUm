@@ -10,10 +10,10 @@ const Login = ({ setIsAuthenticated }) => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:5001/api/auth/login",
-        { nome, senha }
-      );
+      const response = await axios.post("http://localhost:5001/api/login", {
+        nome,
+        senha,
+      });
       setMensagem(response.data.message);
 
       // Exibe a mensagem por um tempo antes de redirecionar
